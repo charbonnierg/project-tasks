@@ -1,0 +1,7 @@
+.venv/
+.ruff_cache/
+__pycache__/
+# Test results
+.coverage
+.coverage_report/
+_OLD/

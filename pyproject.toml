@@ -1,0 +1,72 @@
+[project]
+name = "project-tasks"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "tomli ; python_full_version < '3.11'",
+]
+
+[project.scripts]
+task = "project_tasks.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "coverage>=7.6.1",
+    "mutmut>=2.5.1",
+    "pyright>=1.1.383",
+    "ruff>=0.6.8",
+    "tomli>=2.0.1",
+]
+
+[tool.project-tasks.variables]
+test-src = {default = "src/**,tests/**"}
+test-opts = {default = "-v"}
+
+[tool.project-tasks.tasks]
+test = ["coverage run -m unittest discover ${var.test-opts}", "coverage report -m --include ${var.test-src}", "coverage html"]
+coverage = ["coverage html", "python -m http.server 9999 -b 127.0.0.1 --directory .coverage_report"]
+check-format = ["ruff check --select I --no-fix", "ruff format --check"]
+lint = ["ruff check --no-fix --ignore I", "pyright"]
+sort-imports = "ruff check --select I --fix"
+format.deps = ["sort-imports"]
+format.cmd = ["ruff format"]
+validate.deps = ["check-format", "lint", "test"]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_also = [
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self\\.debug",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+
+    # Don't complain about abstract methods, they aren't run:
+    "@(abc\\.)?abstractmethod",
+    # Don't complain about protocols, they aren't run:
+    "class \\w+\\(Protocol\\):",
+]
+
+ignore_errors = true
+
+[tool.coverage.html]
+directory = ".coverage_report"
+
+[tool.pyright]
+strict = ["src"]
+include = ["src", "tests"]
